@@ -24,7 +24,8 @@ fun SearchScreen(onEventClick: (Event) -> Unit) {
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Svi") }
-    val categories = listOf("Svi", "Koncert", "Predavanje", "Sport", "Kultura", "Meetup")
+    var selectedLocation by remember { mutableStateOf("Sve lokacije") }
+    val categories = listOf("Svi", "Koncert", "Predavanje", "Sport", "Kultura", "Meetup", "Ostalo")
 
     LaunchedEffect(Unit) {
         EventRepository.listenForEvents {
@@ -100,7 +101,7 @@ fun SearchScreen(onEventClick: (Event) -> Unit) {
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
-            listOf("Sve", "Osijek", "FERIT", "Centar", "Kampus").forEach { location ->
+            listOf("Sve", "Osijek", "FERIT", "Centar", "Kampus", "Ostalo").forEach { location ->
                 FilterChip(
                     selected = searchText.contains(location, ignoreCase = true),
                     onClick = {

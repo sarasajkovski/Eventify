@@ -16,17 +16,22 @@ import androidx.compose.ui.unit.sp
 import com.example.eventify.data.Event
 import com.example.eventify.data.EventRepository
 import java.util.Calendar
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditEventScreen(event: Event, onSave: () -> Unit) {
     var title by remember { mutableStateOf(event.title) }
-    var location by remember { mutableStateOf(event.location) }
-    var date by remember { mutableStateOf(event.date) }
-    var category by remember { mutableStateOf(event.category) }
     var description by remember { mutableStateOf(event.description) }
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
+    var location by remember { mutableStateOf(event.location) }
+    var category by remember { mutableStateOf(event.category) }
+    val categories = listOf("Koncert", "Predavanje", "Sport", "Kultura", "Meetup", "Ostalo")
+    val locations = listOf("Osijek", "FERIT", "Centar", "Kampus", "Ostalo")
+
+    var date by remember { mutableStateOf(event.date) }
     val datePicker = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
@@ -34,7 +39,7 @@ fun EditEventScreen(event: Event, onSave: () -> Unit) {
             val timePicker = TimePickerDialog(
                 context,
                 { _, hour, minute ->
-                    date = "$selectedDate ${String.format("%02d:%02d", hour, minute)}"
+                    date = "$selectedDate ${String.format(Locale.getDefault(), "%02d:%02d", hour, minute)}"
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE),
@@ -46,6 +51,7 @@ fun EditEventScreen(event: Event, onSave: () -> Unit) {
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,7 +65,67 @@ fun EditEventScreen(event: Event, onSave: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(20.dp))
         EventTextField(title, { title = it }, "Naziv događaja")
-        EventTextField(location, { location = it }, "Lokacija")
+
+        var locationExpanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(
+            expanded = locationExpanded,
+            onExpandedChange = {
+                locationExpanded = !locationExpanded
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            OutlinedTextField(
+                value = location,
+                onValueChange = {},
+                readOnly = true,
+                label = {
+                    Text("Lokacija")
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = locationExpanded
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(
+                        ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                    ),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF6C2FF2),
+                    unfocusedBorderColor = Color(0xFF2C203A),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color(0xFF9B6CFF),
+                    unfocusedLabelColor = Color.LightGray
+                )
+            )
+
+            ExposedDropdownMenu(
+                expanded = locationExpanded,
+                onDismissRequest = {
+                    locationExpanded = false
+                }
+            ) {
+
+                locations.forEach { item ->
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(item)
+                        },
+                        onClick = {
+
+                            location = item
+                            locationExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -71,24 +137,79 @@ fun EditEventScreen(event: Event, onSave: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = if (date.isEmpty()) "Odaberi datum i vrijeme" else date,
+                text = date.ifEmpty { "Odaberi datum i vrijeme" },
                 color = if (date.isEmpty()) Color.LightGray else Color.White
             )
         }
-        EventTextField(category, { category = it }, "Kategorija")
+        var categoryExpanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(
+            expanded = categoryExpanded,
+            onExpandedChange = {
+                categoryExpanded = !categoryExpanded
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            OutlinedTextField(
+                value = category,
+                onValueChange = {},
+                readOnly = true,
+                label = {
+                    Text("Kategorija")
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = categoryExpanded
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(
+                        ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                    ),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF6C2FF2),
+                    unfocusedBorderColor = Color(0xFF2C203A),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color(0xFF9B6CFF),
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White
+                )
+            )
+            ExposedDropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = {
+                    categoryExpanded = false
+                }
+            ) {
+                categories.forEach { item ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(item)
+                        },
+                        onClick = {
+                            category = item
+                            categoryExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         EventTextField(description, { description = it }, "Opis događaja")
         Spacer(modifier = Modifier.height(20.dp))
         Button(
             onClick = {
-                EventRepository.updateEvent(
-                    event.copy(
+                val updatedEvent = event.copy(
                         title = title,
                         location = location,
                         date = date,
                         category = category,
                         description = description
                     )
-                )
+                EventRepository.updateEvent(updatedEvent)
                 onSave()
             },
             modifier = Modifier

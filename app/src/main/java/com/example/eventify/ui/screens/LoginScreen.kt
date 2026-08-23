@@ -86,13 +86,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     return@Button
                 }
                 isLoading = true
-                auth.signInWithEmailAndPassword(email, password)
+                auth.signInWithEmailAndPassword(email.trim(), password)
                     .addOnCompleteListener {
                         isLoading = false
                     if (it.isSuccessful) {
+                        errorMessage = ""
                         onLoginSuccess()
                     } else {
-                        errorMessage = "Neuspješna prijava"
+                        errorMessage = it.exception?.message ?: "Neuspješna prijava"
                     }
                 }
             },

@@ -5,9 +5,17 @@ import com.google.firebase.auth.FirebaseAuth
 
 object EventRepository {
     private val db = FirebaseFirestore.getInstance()
-    fun addEvent(event: Event) {
+    fun addEvent(event: Event, onSuccess: () -> Unit, onError: (String) -> Unit) {
         db.collection("events")
             .add(event)
+            .addOnSuccessListener {onSuccess()}
+            .addOnFailureListener { exception ->
+                exception.printStackTrace()
+                onError(
+                    exception.message ?: "Greška pri dodavanju događaja."
+                )
+            }
+
     }
     fun getEvents(onSuccess: (List<Event>) -> Unit) {
         db.collection("events")
@@ -60,22 +68,93 @@ object EventRepository {
                 onSuccess(ids)
             }
     }
-    fun listenForEvents(
-        onChange: (List<Event>) -> Unit
-    ) {
+    fun listenForEvents(onChange: (List<Event>) -> Unit) {
         db.collection("events")
-            .addSnapshotListener { value, _ ->
-                if (value != null) {
-                    val events = value.documents.map { document ->
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@addSnapshotListener
+                }
 
-                        document.toObject(Event::class.java)!!
-                            .copy(id = document.id)
+                if (value != null) {
+                    val events = value.documents.mapNotNull { document ->
+                        try {
+                            document.toObject(Event::class.java)?.copy(id = document.id)
+                        } catch(e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
                     }
                     onChange(events)
                 }
             }
     }
 
+    fun addFeedback(feedback: Feedback, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        val feedbackData = mapOf(
+            "eventId" to feedback.eventId,
+            "userId" to feedback.userId,
+            "userName" to feedback.userName,
+            "text" to feedback.text,
+            "rating" to feedback.rating,
+            "createdAt" to feedback.createdAt
+        )
+        db.collection("events")
+            .document(feedback.eventId)
+            .collection("feedback")
+            .add(feedbackData)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { exception ->
+                onError(
+                    exception.message
+                        ?: "Greška pri spremanju feedbacka."
+                )
+            }
+    }
+    fun getFeedback(eventId: String, onSuccess: (List<Feedback>) -> Unit, onError: (String) -> Unit) {
+        db.collection("events")
+            .document(eventId)
+            .collection("feedback")
+            .get()
+            .addOnSuccessListener { result ->
+                val feedbackList = result.documents.mapNotNull { document ->
+                        Feedback(
+                            id = document.id,
+                            eventId = document.getString("eventId") ?: "",
+                            userId = document.getString("userId") ?: "",
+                            userName = document.getString("userName") ?: "Korisnik",
+                            text = document.getString("text") ?: "",
+                            rating = document.getLong("rating")?.toInt() ?: 5,
+                            createdAt = document.getLong("createdAt") ?: 0L
+                        )
+                    }.sortedByDescending {
+                        it.createdAt
+                    }
+                onSuccess(feedbackList)
+            }
+            .addOnFailureListener { exception ->
+                onError(
+                    exception.message
+                        ?: "Greška pri učitavanju feedbacka."
+                )
+            }
+    }
 
-
+    fun deleteFeedback(eventId: String, feedbackId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        db.collection("events")
+            .document(eventId)
+            .collection("feedback")
+            .document(feedbackId)
+            .delete()
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { exception ->
+                onError(
+                    exception.message ?: "Greška pri brisanju feedbacka."
+                )
+            }
+    }
 }

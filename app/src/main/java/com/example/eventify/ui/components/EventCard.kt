@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,19 +20,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.eventify.data.Event
-import com.example.eventify.data.EventRepository
+import java.io.File
 
 @Composable
 fun EventCard(event: Event, onClick: (Event) -> Unit, isFavorite: Boolean = false, onFavoriteClick: (Event) -> Unit = {}) {
-
     Card(
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF120A1F)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        ),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF120A1F)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
@@ -42,90 +37,98 @@ fun EventCard(event: Event, onClick: (Event) -> Unit, isFavorite: Boolean = fals
         Column {
             Image(
                 painter = rememberAsyncImagePainter(
-                    event.imageUrl.ifEmpty {
-                        "https://picsum.photos/400/200"
+                    if (event.imagePaths.isNotEmpty()){
+                        File(event.imagePaths.first())
+                    } else {
+                        null
                     }
                 ),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(130.dp)
                     .clip(
                         RoundedCornerShape(
-                            topStart = 22.dp,
-                            topEnd = 22.dp
+                            topStart = 18.dp,
+                            topEnd = 18.dp
                         )
                     ),
                 contentScale = ContentScale.Crop
             )
-            Column(
+            Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .padding(
+                        start = 18.dp,
+                        end = 8.dp,
+                        top = 15.dp,
+                        bottom = 23.dp
+                    ),
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = event.title,
-                            color = Color.White,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = event.date,
-                            color = Color.LightGray,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = event.location,
-                            color = Color.LightGray,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    Color(0xFF6C2FF2),
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .padding(
-                                    horizontal = 12.dp,
-                                    vertical = 6.dp
-                                )
-                        ) {
-                            Text(
-                                text = event.category,
-                                color = Color.White,
-                                fontSize = 12.sp
+                    Text(
+                        text = event.title,
+                        color = Color.White,
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(7.dp))
+                    Text(
+                        text = event.date,
+                        color = Color.LightGray,
+                        fontSize = 19.sp,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = event.location,
+                        color = Color.LightGray,
+                        fontSize = 18.sp,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                Color(0xFF6C2FF2),
+                                RoundedCornerShape(10.dp)
                             )
-                        }
-                    }
-                    IconButton(
-                        onClick = {
-                            onFavoriteClick(event)
-                        }
+                            .padding(
+                                horizontal = 15.dp,
+                                vertical = 6.dp
+                            )
                     ) {
-                        Icon(
-                            imageVector =
-                                if (isFavorite)
-                                    Icons.Filled.Favorite
-                                else
-                                    Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            tint =
-                                if (isFavorite)
-                                    Color.Red
-                                else
-                                    Color.White
+                        Text(
+                            text = event.category,
+                            color = Color.White,
+                            fontSize = 13.sp
                         )
                     }
+                }
+
+                IconButton(
+                    onClick = { onFavoriteClick(event) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector =
+                            if (isFavorite)
+                                Icons.Filled.Favorite
+                            else
+                                Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint =
+                            if (isFavorite)
+                                Color.Red
+                            else
+                                Color.White
+                    )
                 }
             }
         }

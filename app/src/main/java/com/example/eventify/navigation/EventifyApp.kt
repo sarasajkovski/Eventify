@@ -13,7 +13,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.eventify.ui.screens.*
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.eventify.data.Event
 import com.example.eventify.ui.screens.LoginScreen
 import com.example.eventify.ui.screens.RegisterScreen
@@ -48,21 +47,33 @@ fun EventifyApp() {
             MainScreen(
                 onLogout = {
                     FirebaseAuth.getInstance().signOut()
-                    navController.navigate("start")
+                    navController.navigate("start"){
+                        popUpTo("main") {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate("main")
+                    navController.navigate("main") {
+                        popUpTo("login") {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
         composable("register") {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.navigate("main")
+                    navController.navigate("main"){
+                        popUpTo("register") {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
@@ -80,6 +91,16 @@ fun MainScreen( onLogout: () -> Unit) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    fun navigateToTab(route: String) {
+        bottomNavController.navigate(route) {
+            popUpTo("home") {
+                inclusive = false
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -113,13 +134,7 @@ fun MainScreen( onLogout: () -> Unit) {
                 NavigationBarItem(
                     selected = currentRoute == "home",
                     onClick = {
-                        bottomNavController.navigate("home") {
-                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navigateToTab("home")
                     },
                     icon = {
                         Icon(
@@ -136,16 +151,11 @@ fun MainScreen( onLogout: () -> Unit) {
                         unselectedTextColor = Color.Gray
                     )
                 )
+
                 NavigationBarItem(
                     selected = currentRoute == "search",
                     onClick = {
-                        bottomNavController.navigate("search") {
-                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navigateToTab("search")
                     },
                     icon = {
                         Icon(
@@ -162,41 +172,11 @@ fun MainScreen( onLogout: () -> Unit) {
                         unselectedTextColor = Color.Gray
                     )
                 )
-                NavigationBarItem(
-                    selected = currentRoute == "favorites",
-                    onClick = {
-                        bottomNavController.navigate("favorites") {
-                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    icon = {
-                        Icon(Icons.Default.Favorite, contentDescription = "Omiljeno")
-                    },
-                    label = {
-                        Text("Omiljeno")
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        indicatorColor = Color(0xFF6C2FF2),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray
-                    )
-                )
+
                 NavigationBarItem(
                     selected = currentRoute == "add",
                     onClick = {
-                        bottomNavController.navigate("add") {
-                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navigateToTab("add")
                     },
                     icon = {
                         Icon(Icons.Default.Add, contentDescription = "Dodaj")
@@ -212,16 +192,31 @@ fun MainScreen( onLogout: () -> Unit) {
                         unselectedTextColor = Color.Gray
                     )
                 )
+
+                NavigationBarItem(
+                    selected = currentRoute == "favorites",
+                    onClick = {
+                        navigateToTab("favorites")
+                    },
+                    icon = {
+                        Icon(Icons.Default.Favorite, contentDescription = "Omiljeno")
+                    },
+                    label = {
+                        Text("Omiljeno")
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF6C2FF2),
+                        unselectedIconColor = Color.Gray,
+                        unselectedTextColor = Color.Gray
+                    )
+                )
+
                 NavigationBarItem(
                     selected = currentRoute == "profile",
                     onClick = {
-                        bottomNavController.navigate("profile") {
-                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navigateToTab("profile")
                     },
                     icon = {
                         Icon(
@@ -241,7 +236,6 @@ fun MainScreen( onLogout: () -> Unit) {
             }
         }
     ) { innerPadding ->
-
         NavHost(
             navController = bottomNavController,
             startDestination = "home",
@@ -256,7 +250,12 @@ fun MainScreen( onLogout: () -> Unit) {
                 )
             }
             composable("map") {
-                MapScreen()
+                MapScreen(
+                    event = selectedEvent,
+                    onBack = {
+                        bottomNavController.popBackStack()
+                    }
+                )
             }
             composable("favorites") {
                 FavoritesScreen()
@@ -267,11 +266,20 @@ fun MainScreen( onLogout: () -> Unit) {
             composable("details") {
                 EventDetailsScreen(
                     event = selectedEvent,
+                    onBack = {
+                        bottomNavController.popBackStack()
+                    },
                     onDelete = {
-                        bottomNavController.navigate("events")
+                        bottomNavController.popBackStack()
                     },
                     onEdit = {
                         bottomNavController.navigate("edit")
+                    },
+                    onShare = {
+                        bottomNavController.navigate("share")
+                    },
+                    onMapClick = {
+                        bottomNavController.navigate("map")
                     }
                 )
             }
@@ -279,7 +287,15 @@ fun MainScreen( onLogout: () -> Unit) {
                 EditEventScreen(
                     event = selectedEvent,
                     onSave = {
-                        bottomNavController.navigate("events")
+                        bottomNavController.popBackStack()
+                    }
+                )
+            }
+            composable("share") {
+                ShareEventScreen(
+                    event = selectedEvent,
+                    onBack = {
+                        bottomNavController.popBackStack()
                     }
                 )
             }
@@ -291,14 +307,23 @@ fun MainScreen( onLogout: () -> Unit) {
                     }
                 )
             }
-            composable("profile") {
-                ProfileScreen(
-                    onLogout = {
-                        FirebaseAuth.getInstance().signOut()
-                        bottomNavController.navigate("start")
+            composable("myEvents") {
+                MyEventsScreen(
+                    onEventClick = { event ->
+                        selectedEvent = event
+                        bottomNavController.navigate("details")
                     }
                 )
             }
+            composable("profile") {
+                ProfileScreen(
+                    onLogout = onLogout,
+                    onMyEventsClick = {
+                        bottomNavController.navigate("myEvents")
+                    }
+                )
+            }
+
         }
     }
 }

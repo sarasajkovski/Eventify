@@ -36,12 +36,12 @@ fun EventsScreen(onEventClick: (Event) -> Unit) {
             .padding(20.dp)
     ) {
         Text(
-            text = "Početna",
+            text = "Popis događaja",
             color = Color.White,
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(35.dp))
         if (isLoading) {
             CircularProgressIndicator(
                 color = Color(0xFF6C2FF2)

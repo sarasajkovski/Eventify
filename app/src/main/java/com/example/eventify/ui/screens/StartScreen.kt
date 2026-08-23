@@ -72,20 +72,24 @@ fun StartScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit) {
             Button(
                 onClick = onRegisterClick,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.85f)
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF6C2FF2)
                 )
             ) {
-                Text("Kreiraj račun")
+                Text(
+                    text = "Kreiraj račun",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(17.dp))
             OutlinedButton(
                 onClick = onLoginClick,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.85f)
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -94,7 +98,7 @@ fun StartScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit) {
             ) {
                 Text(
                     text = "Prijavi se",
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
