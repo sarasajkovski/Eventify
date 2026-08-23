@@ -2,6 +2,7 @@ package com.example.eventify.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
@@ -17,7 +18,6 @@ import com.example.eventify.data.Event
 import com.example.eventify.ui.screens.LoginScreen
 import com.example.eventify.ui.screens.RegisterScreen
 import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
@@ -119,7 +119,7 @@ fun MainScreen( onLogout: () -> Unit) {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Logout,
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Logout",
                             tint = Color.White
                         )

@@ -4,7 +4,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 
 object EventRepository {
-    private val db = FirebaseFirestore.getInstance()
+    private val db: FirebaseFirestore by lazy {
+        FirebaseFirestore.getInstance()
+    }
     fun addEvent(event: Event, onSuccess: () -> Unit, onError: (String) -> Unit) {
         db.collection("events")
             .add(event)

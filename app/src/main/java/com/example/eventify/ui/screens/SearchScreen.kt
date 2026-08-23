@@ -24,7 +24,6 @@ fun SearchScreen(onEventClick: (Event) -> Unit) {
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Svi") }
-    var selectedLocation by remember { mutableStateOf("Sve lokacije") }
     val categories = listOf("Svi", "Koncert", "Predavanje", "Sport", "Kultura", "Meetup", "Ostalo")
 
     LaunchedEffect(Unit) {
