@@ -17,7 +17,7 @@ import com.example.eventify.data.EventRepository
 import com.example.eventify.ui.components.EventCard
 
 @Composable
-fun FavoritesScreen() {
+fun FavoritesScreen(onEventClick: (Event) -> Unit) {
     var favoriteIds by remember { mutableStateOf<List<String>>(emptyList()) }
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -62,7 +62,7 @@ fun FavoritesScreen() {
                 items(favoriteEvents) { event ->
                     EventCard(
                         event = event,
-                        onClick = {},
+                        onClick = {onEventClick(event)},
                         isFavorite = true,
                         onFavoriteClick = { selectedEvent ->
                             EventRepository.removeFavorite(selectedEvent.id)

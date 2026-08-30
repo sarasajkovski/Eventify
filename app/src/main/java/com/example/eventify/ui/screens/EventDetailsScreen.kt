@@ -27,11 +27,13 @@ import com.example.eventify.data.EventRepository
 import com.example.eventify.utils.NotificationHelper
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -67,6 +69,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
     val context = LocalContext.current
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isOwner = currentUserId == currentEvent.userId
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     var feedbackList by remember {
         mutableStateOf<List<Feedback>>(emptyList())
@@ -84,7 +87,6 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
     var isSendingFeedback by remember { mutableStateOf(false) }
 
     var selectedImagePath by remember { mutableStateOf<String?>(null) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
     var localGalleryImages by remember { mutableStateOf(currentEvent.imagePaths) }
     LaunchedEffect(currentEvent.imagePaths) {
         localGalleryImages = currentEvent.imagePaths
@@ -115,11 +117,8 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                         null
                     }
                 }
-                // Dodaj nove slike postojećima
                 val updatedImages = localGalleryImages + newPaths
-                // Odmah prikaži nove slike
                 localGalleryImages = updatedImages
-                // Spremi SVE slike u Event
                 val updatedEvent = currentEvent.copy(imagePaths = updatedImages)
                 EventRepository.updateEvent(updatedEvent)
             } catch (e: Exception) {
@@ -129,23 +128,19 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
 
     fun deleteGalleryImage(imagePath: String) {
         try {
-            // Obriši lokalnu datoteku
             val file = File(imagePath)
             if (file.exists()) {
                 file.delete()
             }
-            // Ukloni fotografiju iz liste
             val updatedGallery =
                 localGalleryImages.filter {
                     it != imagePath
                 }
             localGalleryImages = updatedGallery
-            // Spremi novu listu u Firestore
             val updatedEvent = currentEvent.copy(
                 imagePaths = updatedGallery
             )
             EventRepository.updateEvent(updatedEvent)
-            // Zatvori fullscreen
             selectedImagePath = null
         } catch (e: Exception) {
             e.printStackTrace()
@@ -262,7 +257,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                     Text(
                         text = currentEvent.location,
                         color = Color.LightGray,
-                        fontSize = 17.sp
+                        fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(1.dp))
                     Row(
@@ -271,7 +266,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                         Text(
                             text = "★",
                             color = Color(0xFFFFC107),
-                            fontSize = 18.sp
+                            fontSize = 17.sp
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -314,23 +309,23 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                 Text(
                     text = "Opis događaja",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Text(
                     text = currentEvent.description.ifEmpty {
                         "Nema opisa za ovaj događaj."
                     },
                     color = Color.LightGray,
-                    fontSize = 19.sp,
-                    lineHeight = 20.sp
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(end = 20.dp)
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
             }
-
 
             item {
                 Text(
@@ -625,8 +620,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                         text = "Obriši događaj",
                         textColor = Color.Red
                     ) {
-                        EventRepository.deleteEvent(currentEvent.id)
-                        onDelete()
+                        showDeleteDialog = true
                     }
                 }
             }
@@ -712,6 +706,44 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
             }
         }
     }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+            title = {
+                Text("Brisanje događaja")
+            },
+            text = {
+                Text("Jeste li sigurni da želite obrisati ovaj događaj?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        EventRepository.deleteEvent(currentEvent.id)
+                        onDelete()
+                    }
+                ) {
+                    Text(
+                        text = "Obriši",
+                        color = Color.Red
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Odustani")
+                }
+            }
+        )
+    }
+
     if (selectedImagePath != null) {
         Dialog(
             onDismissRequest = { selectedImagePath = null },
@@ -752,7 +784,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
         }
     }
     if (showDeleteDialog && selectedImagePath != null) {
-        androidx.compose.material3.AlertDialog(
+       AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = {
                 Text(

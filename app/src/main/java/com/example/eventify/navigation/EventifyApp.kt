@@ -258,7 +258,12 @@ fun MainScreen( onLogout: () -> Unit) {
                 )
             }
             composable("favorites") {
-                FavoritesScreen()
+                FavoritesScreen(
+                    onEventClick = { event ->
+                        selectedEvent = event
+                        bottomNavController.navigate("details")
+                    }
+                )
             }
             composable("add") {
                 AddEventScreen()

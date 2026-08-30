@@ -21,6 +21,7 @@ import com.example.eventify.ui.components.EventCard
 
 @Composable
 fun SearchScreen(onEventClick: (Event) -> Unit) {
+
     var events by remember { mutableStateOf<List<Event>>(emptyList()) }
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Svi") }
@@ -39,6 +40,7 @@ fun SearchScreen(onEventClick: (Event) -> Unit) {
             selectedCategory == "Svi" || event.category == selectedCategory
         matchSearch && matchCategory
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -14,9 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun RegisterScreen(
-    onRegisterSuccess: () -> Unit
-) {
+fun RegisterScreen(onRegisterSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -103,6 +101,7 @@ fun RegisterScreen(
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
+
         if (errorMessage.isNotEmpty()) {
             Text(errorMessage, color = Color.Red)
         }

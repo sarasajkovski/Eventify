@@ -24,6 +24,7 @@ import java.io.File
 
 @Composable
 fun ShareEventScreen(event: Event, onBack: () -> Unit) {
+
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -46,6 +47,7 @@ fun ShareEventScreen(event: Event, onBack: () -> Unit) {
                     }
             )
             Spacer(modifier = Modifier.width(14.dp))
+
             Text(
                 text = "Podijeli događaj",
                 color = Color.White,
@@ -53,9 +55,8 @@ fun ShareEventScreen(event: Event, onBack: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(
-            modifier = Modifier.height(25.dp)
-        )
+        Spacer(modifier = Modifier.height(25.dp))
+
         Text(
             text = "Detalji događaja na dohvat ruke",
             color = Color.White,

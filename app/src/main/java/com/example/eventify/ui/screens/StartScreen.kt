@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventify.R
 
-
 @Composable
 fun StartScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit) {
 
@@ -59,6 +58,7 @@ fun StartScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = "Otkrij. Sudjeluj. \nPoveži se",
                 color = Color(0xFFB8B8B8),
@@ -86,6 +86,7 @@ fun StartScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(17.dp))
+
             OutlinedButton(
                 onClick = onLoginClick,
                 modifier = Modifier

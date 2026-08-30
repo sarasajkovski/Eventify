@@ -18,13 +18,9 @@ import com.example.eventify.data.EventRepository
 import com.example.eventify.ui.components.EventCard
 
 @Composable
-fun MyEventsScreen(
-    onEventClick: (Event) -> Unit
-) {
-    var events by remember {
-        mutableStateOf<List<Event>>(emptyList())
-    }
+fun MyEventsScreen(onEventClick: (Event) -> Unit) {
 
+    var events by remember { mutableStateOf<List<Event>>(emptyList()) }
     val currentUserId =
         FirebaseAuth.getInstance()
             .currentUser
@@ -32,13 +28,11 @@ fun MyEventsScreen(
 
     LaunchedEffect(Unit) {
         EventRepository.listenForEvents { allEvents ->
-
             events = allEvents.filter { event ->
                 event.userId == currentUserId
             }
         }
     }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,18 +45,13 @@ fun MyEventsScreen(
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
-
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
+        Spacer(modifier = Modifier.height(20.dp))
 
         if (events.isEmpty()) {
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-
                 Text(
                     text = "Još nisi dodao/la nijedan događaj.",
                     color = Color.Gray,
@@ -71,14 +60,11 @@ fun MyEventsScreen(
             }
 
         } else {
-
             LazyColumn(
                 verticalArrangement =
                     Arrangement.spacedBy(16.dp)
             ) {
-
                 items(events) { event ->
-
                     EventCard(
                         event = event,
                         onClick = onEventClick

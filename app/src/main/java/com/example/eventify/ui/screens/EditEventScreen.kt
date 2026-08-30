@@ -29,7 +29,7 @@ fun EditEventScreen(event: Event, onSave: () -> Unit) {
     var location by remember { mutableStateOf(event.location) }
     var category by remember { mutableStateOf(event.category) }
     val categories = listOf("Koncert", "Predavanje", "Sport", "Kultura", "Meetup", "Ostalo")
-    val locations = listOf("Osijek", "FERIT", "Centar", "Kampus", "Ostalo")
+    val locations = listOf("Tvrđa", "Centar Osijeka", "Kampus", "Gradski vrt", "Ostalo")
 
     var date by remember { mutableStateOf(event.date) }
     val datePicker = DatePickerDialog(

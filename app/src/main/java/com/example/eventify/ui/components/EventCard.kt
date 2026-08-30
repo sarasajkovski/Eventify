@@ -72,7 +72,7 @@ fun EventCard(event: Event, onClick: (Event) -> Unit, isFavorite: Boolean = fals
                     Text(
                         text = event.title,
                         color = Color.White,
-                        fontSize = 23.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
@@ -80,7 +80,7 @@ fun EventCard(event: Event, onClick: (Event) -> Unit, isFavorite: Boolean = fals
                     Text(
                         text = event.date,
                         color = Color.LightGray,
-                        fontSize = 19.sp,
+                        fontSize = 17.sp,
                         maxLines = 1
                     )
                     Spacer(modifier = Modifier.height(20.dp))
