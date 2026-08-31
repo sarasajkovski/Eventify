@@ -2,6 +2,7 @@ package com.example.eventify.data
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 
 object EventRepository {
     private val db: FirebaseFirestore by lazy {
@@ -92,7 +93,7 @@ object EventRepository {
             }
     }
 
-    fun addFeedback(feedback: Feedback, onSuccess: () -> Unit, onError: (String) -> Unit) {
+   suspend fun addFeedback(feedback: Feedback) {
         val feedbackData = mapOf(
             "eventId" to feedback.eventId,
             "userId" to feedback.userId,
@@ -105,15 +106,7 @@ object EventRepository {
             .document(feedback.eventId)
             .collection("feedback")
             .add(feedbackData)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { exception ->
-                onError(
-                    exception.message
-                        ?: "Greška pri spremanju feedbacka."
-                )
-            }
+            .await()
     }
     fun getFeedback(eventId: String, onSuccess: (List<Feedback>) -> Unit, onError: (String) -> Unit) {
         db.collection("events")

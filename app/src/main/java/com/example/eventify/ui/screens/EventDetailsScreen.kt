@@ -52,6 +52,8 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import java.io.File
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit, onShare: () -> Unit, onMapClick: () -> Unit) {
@@ -70,6 +72,7 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isOwner = currentUserId == currentEvent.userId
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     var feedbackList by remember {
         mutableStateOf<List<Feedback>>(emptyList())
@@ -493,13 +496,11 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                                 rating = selectedRating
                             )
 
-                            EventRepository.addFeedback(
-                                feedback = feedback,
-                                onSuccess = {
-                                    isSendingFeedback = false
+                            coroutineScope.launch {
+                                try {
+                                    EventRepository.addFeedback(feedback)
                                     feedbackText = ""
                                     selectedRating = 5
-
                                     EventRepository.getFeedback(
                                         eventId = currentEvent.id,
                                         onSuccess = { feedbacks ->
@@ -509,12 +510,13 @@ fun EventDetailsScreen( event: Event, onBack: () -> Unit, onDelete: () -> Unit, 
                                             feedbackError = error
                                         }
                                     )
-                                },
-                                onError = { error ->
+                                } catch (e: Exception) {
+                                    feedbackError =
+                                        e.message ?: "Greška pri spremanju feedbacka."
+                                } finally {
                                     isSendingFeedback = false
-                                    feedbackError = error
                                 }
-                            )
+                            }
                         },
                         enabled = !isSendingFeedback,
                         modifier = Modifier
